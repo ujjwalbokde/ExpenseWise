@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.5rem;
+
+    /* Custom ExpenseWise Colors */
+    --expense-red: 0 84% 60%;
+    --income-green: 142 76% 36%;
+    --warning-orange: 36 100% 50%;
+    --info-blue: 210 100% 50%;
+    --purple: 262 83% 58%;
+    --teal: 174 100% 29%;
+    --pink: 340 82% 52%;
+    --gradient-start: 221.2 83.2% 53.3%;
+    --gradient-end: 262 83% 58%;
+
+    /* Sidebar Colors */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 222.2 84% 4.9%;
+    --sidebar-muted: 210 40% 96.1%;
+    --sidebar-muted-foreground: 215.4 16.3% 46.9%;
+    --sidebar-accent: 210 40% 96.1%;
+    --sidebar-accent-foreground: 222.2 47.4% 11.2%;
+    --sidebar-border: 214.3 31.8% 91.4%;
+  }
+
+  .dark {
+    --background: 222.2 47.4% 11.2%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 47.4% 13.2%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 50.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 60%;
+
+    /* Custom ExpenseWise Dark Colors */
+    --expense-red: 0 84% 70%;
+    --income-green: 142 76% 46%;
+    --warning-orange: 36 100% 60%;
+    --info-blue: 210 100% 60%;
+    --purple: 262 83% 68%;
+    --teal: 174 100% 39%;
+    --pink: 340 82% 62%;
+    --gradient-start: 217.2 91.2% 59.8%;
+    --gradient-end: 262 83% 68%;
+
+    /* Sidebar Colors */
+    --sidebar-background: 222.2 47.4% 13.2%;
+    --sidebar-foreground: 210 40% 98%;
+    --sidebar-muted: 217.2 32.6% 17.5%;
+    --sidebar-muted-foreground: 215 20.2% 65.1%;
+    --sidebar-accent: 217.2 32.6% 17.5%;
+    --sidebar-accent-foreground: 210 40% 98%;
+    --sidebar-border: 217.2 32.6% 17.5%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* Custom Styles */
+/* Using standard CSS properties instead of @apply for gradients */
+.gradient-text {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(to right, #1976d2, #9c27b0);
+}
+
+.dark .gradient-text {
+  background-image: linear-gradient(to right, #42a5f5, #ce93d8);
+}
+
+.gradient-bg {
+  background-image: linear-gradient(to right, #1976d2, #9c27b0);
+}
+
+.dark .gradient-bg {
+  background-image: linear-gradient(to right, #42a5f5, #ce93d8);
+}
+
+.card-hover {
+  @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+}
+
+.dark .card-hover {
+  @apply hover:shadow-lg hover:shadow-primary/5;
+}
+
+.animated-button {
+  @apply relative overflow-hidden transition-all duration-300;
+}
+
+.animated-button::after {
+  content: "";
+  @apply absolute top-0 left-0 w-full h-full bg-white opacity-0 transition-opacity duration-300;
+}
+
+.animated-button:hover::after {
+  @apply opacity-20;
+}
+
+.dark .animated-button::after {
+  @apply bg-white;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-muted;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-primary/50 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-primary;
+}
+
+/* Dashboard Card Animations */
+.dashboard-card {
+  @apply transition-all duration-500 hover:shadow-lg hover:-translate-y-1;
+}
+
+.dark .dashboard-card {
+  @apply hover:shadow-primary/10;
+}
+
+/* Progress Bar Animations */
+.progress-bar-animate {
+  @apply transition-all duration-1000 ease-in-out;
+}
+
+/* Page Transitions */
+.page-transition {
+  @apply animate-in fade-in duration-500;
+}
