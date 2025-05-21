@@ -1,47 +1,58 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Overview } from "@/components/dashboard/overview"
-import { RecentTransactions } from "@/components/dashboard/recent-transactions"
-import { DashboardCards } from "@/components/dashboard/dashboard-cards"
-import { CategoryBreakdown } from "@/components/dashboard/category-breakdown"
-import { BudgetOverview } from "@/components/dashboard/budget-overview"
-import { getDashboardData } from "@/lib/api/dashboard"
-import { useToast } from "@/components/ui/use-toast"
-import { Skeleton } from "@/components/ui/skeleton"
-import { BarChart, List, PieChart } from "lucide-react"
-import { useSidebar } from "@/components/sidebar-provider"
-
+import { useEffect, useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Overview } from "@/components/dashboard/overview";
+import { RecentTransactions } from "@/components/dashboard/recent-transactions";
+import { DashboardCards } from "@/components/dashboard/dashboard-cards";
+import { CategoryBreakdown } from "@/components/dashboard/category-breakdown";
+import { BudgetOverview } from "@/components/dashboard/budget-overview";
+import { getDashboardData } from "@/lib/api/dashboard";
+import { useToast } from "@/components/ui/use-toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { BarChart, List, PieChart } from "lucide-react";
+import { useSidebar } from "@/components/sidebar-provider";
+import { SavingsChart } from "@/components/dashboard/savingsChart";
+import {MonthlyComparisonChart} from "@/components/dashboard/barChart";
 export default function DashboardPage() {
-  const [dashboardData, setDashboardData] = useState(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const { toast } = useToast()
-  const { isOpen } = useSidebar()
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const { isOpen } = useSidebar();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getDashboardData()
-        setDashboardData(data)
+        const data = await getDashboardData();
+        setDashboardData(data);
       } catch (error) {
         toast({
           variant: "destructive",
           title: "Error",
           description: "Failed to load dashboard data. Please try again.",
-        })
+        });
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [toast])
+    fetchData();
+  }, [toast]);
 
   if (isLoading) {
     return (
-      <div className={`space-y-6 animate-in fade-in duration-300 ${isOpen ? "ml-4" : "ml-2"}`}>
+      <div
+        className={`space-y-6 animate-in fade-in duration-300 ${
+          isOpen ? "ml-4" : "ml-2"
+        }`}
+      >
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-10 w-32" />
@@ -59,7 +70,7 @@ export default function DashboardPage() {
         </div>
         <Skeleton className="h-[400px] w-full" />
       </div>
-    )
+    );
   }
 
   // For demo purposes, we'll use mock data if the API call fails
@@ -86,28 +97,55 @@ export default function DashboardPage() {
       { name: "Utilities", value: 250 },
       { name: "Other", value: 450 },
     ],
-    budgets: [
-      { category: "Housing", budget: 1500, spent: 1200 },
-      { category: "Food", budget: 800, spent: 600 },
-      { category: "Transportation", budget: 500, spent: 400 },
-      { category: "Entertainment", budget: 400, spent: 300 },
-      { category: "Utilities", budget: 300, spent: 250 },
-    ],
     recentTransactions: [
-      { id: 1, description: "Grocery Shopping", amount: -120, category: "Food", date: "2024-05-18" },
-      { id: 2, description: "Salary", amount: 4500, category: "Income", date: "2024-05-15" },
-      { id: 3, description: "Electricity Bill", amount: -85, category: "Utilities", date: "2024-05-12" },
-      { id: 4, description: "Restaurant", amount: -65, category: "Food", date: "2024-05-10" },
-      { id: 5, description: "Gas", amount: -45, category: "Transportation", date: "2024-05-08" },
+      {
+        id: 1,
+        description: "Grocery Shopping",
+        amount: -120,
+        category: "Food",
+        date: "2024-05-18",
+      },
+      {
+        id: 2,
+        description: "Salary",
+        amount: 4500,
+        category: "Income",
+        date: "2024-05-15",
+      },
+      {
+        id: 3,
+        description: "Electricity Bill",
+        amount: -85,
+        category: "Utilities",
+        date: "2024-05-12",
+      },
+      {
+        id: 4,
+        description: "Restaurant",
+        amount: -65,
+        category: "Food",
+        date: "2024-05-10",
+      },
+      {
+        id: 5,
+        description: "Gas",
+        amount: -45,
+        category: "Transportation",
+        date: "2024-05-08",
+      },
     ],
-  }
+  };
 
   return (
-    <div className={`space-y-6 animate-in fade-in duration-300 page-transition ${isOpen ? "ml-4" : "ml-2"}`}>
+    <div
+      className={`space-y-6 animate-in fade-in duration-300 page-transition ${
+        isOpen ? "ml-4" : "ml-2"
+      }`}
+    >
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div className="w-full">
           <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 max-w-lg">
+            <TabsList className="grid w-full grid-cols-2 max-w-lg">
               <TabsTrigger value="overview" className="flex items-center gap-2">
                 <PieChart className="h-4 w-4" />
                 <span>Overview</span>
@@ -116,7 +154,10 @@ export default function DashboardPage() {
                 <BarChart className="h-4 w-4" />
                 <span>Budgets</span>
               </TabsTrigger> */}
-              <TabsTrigger value="transactions" className="flex items-center gap-2">
+              <TabsTrigger
+                value="transactions"
+                className="flex items-center gap-2"
+              >
                 <List className="h-4 w-4" />
                 <span>Transactions</span>
               </TabsTrigger>
@@ -124,12 +165,16 @@ export default function DashboardPage() {
 
             <TabsContent value="overview" className="mt-6 space-y-6">
               <DashboardCards data={data.summary} />
-              
+
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="lg:col-span-4 dashboard-card">
                   <CardHeader>
-                    <CardTitle className="font-montserrat">Income vs Expenses</CardTitle>
-                    <CardDescription>Your income and expenses for the last 6 months</CardDescription>
+                    <CardTitle className="font-montserrat">
+                      Income vs Expenses
+                    </CardTitle>
+                    <CardDescription>
+                      Your income and expenses for the last 6 months
+                    </CardDescription>
                   </CardHeader>
                   <CardContent className="pl-2">
                     <Overview data={data.monthlyData} />
@@ -137,11 +182,35 @@ export default function DashboardPage() {
                 </Card>
                 <Card className="lg:col-span-3 dashboard-card">
                   <CardHeader>
-                    <CardTitle className="font-montserrat">Expense Breakdown</CardTitle>
+                    <CardTitle className="font-montserrat">
+                      Expense Breakdown
+                    </CardTitle>
                     <CardDescription>Your spending by category</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <CategoryBreakdown data={data.categoryBreakdown} />
+                  </CardContent>
+                </Card>
+                <Card className="lg:col-span-3 dashboard-card">
+                  <CardHeader>
+                    <CardTitle className="font-montserrat">
+                      Savings Over Time
+                    </CardTitle>
+                    <CardDescription>Monthly net savings trend</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <SavingsChart data={data.monthlyData} />
+                  </CardContent>
+                </Card>
+                <Card className="lg:col-span-4 dashboard-card">
+                  <CardHeader>
+                    <CardTitle className="font-montserrat">
+                      Monthly Comparison
+                    </CardTitle>
+                    <CardDescription>Incomes, Expenses, Savings</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <MonthlyComparisonChart data={data.monthlyData} />
                   </CardContent>
                 </Card>
               </div>
@@ -162,8 +231,12 @@ export default function DashboardPage() {
             <TabsContent value="transactions" className="mt-6">
               <Card className="dashboard-card">
                 <CardHeader>
-                  <CardTitle className="font-montserrat">Recent Transactions</CardTitle>
-                  <CardDescription>Your most recent transactions</CardDescription>
+                  <CardTitle className="font-montserrat">
+                    Recent Transactions
+                  </CardTitle>
+                  <CardDescription>
+                    Your most recent transactions
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <RecentTransactions data={data.recentTransactions} />
@@ -174,5 +247,5 @@ export default function DashboardPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

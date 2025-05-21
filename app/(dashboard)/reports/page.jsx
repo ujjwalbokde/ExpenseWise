@@ -1,30 +1,88 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { format } from "date-fns"
-import { CalendarIcon, Download, FileText, BarChart3, PieChart, LineChart } from "lucide-react"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { format } from "date-fns";
+import {
+  CalendarIcon,
+  Download,
+  FileText,
+  BarChart3,
+  PieChart,
+  LineChart,
+  IndianRupeeIcon,
+} from "lucide-react";
+import { getDashboardData } from "@/lib/api/dashboard";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ReportsPage() {
-  const [date, setDate] = useState(new Date())
-  const [reportType, setReportType] = useState("monthly")
+  const [date, setDate] = useState(new Date());
+  const [reportType, setReportType] = useState("monthly");
+  const [dashboardData, setDashboardData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const data = await getDashboardData();
+        setDashboardData(data);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load dashboard data. Please try again.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [toast]);
+
+  const renderValue = (value, color) => (
+    <div className={`text-2xl font-bold text-[${color}] flex items-center gap-1`}>
+      <IndianRupeeIcon className="w-5 h-5" />
+      {isLoading ? "Loading..." : value}
+    </div>
+  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-300">
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <h2 className="text-3xl font-bold tracking-tight font-montserrat">Reports</h2>
+        <h2 className="text-3xl font-bold tracking-tight font-montserrat">
+          Reports
+        </h2>
         <Button className="group bg-[#1976d2] hover:bg-[#115293]">
           <Download className="mr-2 h-4 w-4" />
           Export Report
         </Button>
       </div>
 
+      {/* Summary Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Income */}
         <Card className="dashboard-card border-l-4 border-l-[#1976d2]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Income Report</CardTitle>
@@ -33,11 +91,14 @@ export default function ReportsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#1976d2]">$4,500.00</div>
-            <p className="text-xs text-muted-foreground mt-1">View detailed income breakdown</p>
+            {renderValue(dashboardData?.summary?.totalIncome, "#1976d2")}
+            <p className="text-xs text-muted-foreground mt-1">
+              View detailed income breakdown
+            </p>
           </CardContent>
         </Card>
 
+        {/* Expenses */}
         <Card className="dashboard-card border-l-4 border-l-[#f44336]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Expense Report</CardTitle>
@@ -46,11 +107,14 @@ export default function ReportsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#f44336]">$3,200.00</div>
-            <p className="text-xs text-muted-foreground mt-1">View detailed expense breakdown</p>
+            {renderValue(dashboardData?.summary?.totalExpenses, "#f44336")}
+            <p className="text-xs text-muted-foreground mt-1">
+              View detailed expense breakdown
+            </p>
           </CardContent>
         </Card>
 
+        {/* Savings */}
         <Card className="dashboard-card border-l-4 border-l-[#4caf50]">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Savings Report</CardTitle>
@@ -59,19 +123,25 @@ export default function ReportsPage() {
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#4caf50]">$1,300.00</div>
-            <p className="text-xs text-muted-foreground mt-1">View detailed savings breakdown</p>
+            {renderValue(dashboardData?.summary?.balance, "#4caf50")}
+            <p className="text-xs text-muted-foreground mt-1">
+              View detailed savings breakdown
+            </p>
           </CardContent>
         </Card>
       </div>
 
+      {/* Generate Report */}
       <Card>
         <CardHeader>
           <CardTitle className="font-montserrat">Generate Report</CardTitle>
-          <CardDescription>Create custom financial reports for your records</CardDescription>
+          <CardDescription>
+            Create custom financial reports for your records
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-3">
+            {/* Report Type */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Report Type</label>
               <Select defaultValue={reportType} onValueChange={setReportType}>
@@ -87,21 +157,31 @@ export default function ReportsPage() {
               </Select>
             </div>
 
+            {/* Date Picker */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Date</label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal">
+                  <Button
+                    variant="outline"
+                    className="w-full justify-start text-left font-normal"
+                  >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {format(date, "MMMM yyyy")}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0">
-                  <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
+                  <Calendar
+                    mode="single"
+                    selected={date}
+                    onSelect={setDate}
+                    initialFocus
+                  />
                 </PopoverContent>
               </Popover>
             </div>
 
+            {/* Format */}
             <div className="space-y-2">
               <label className="text-sm font-medium">Format</label>
               <Select defaultValue="pdf">
@@ -123,7 +203,7 @@ export default function ReportsPage() {
           </Button>
         </CardContent>
       </Card>
-
+      {/* 
       <Tabs defaultValue="income" className="w-full">
         <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="income">Income</TabsTrigger>
@@ -184,7 +264,8 @@ export default function ReportsPage() {
             </CardContent>
           </Card>
         </TabsContent>
-      </Tabs>
+      </Tabs> */}
     </div>
-  )
+  );
 }
+

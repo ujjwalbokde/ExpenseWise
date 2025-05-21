@@ -1,10 +1,9 @@
 "use client"
 
 import { CartesianGrid, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
-
 export function Overview({ data }) {
   return (
-    <ResponsiveContainer width="100%" height={350}>
+    <ResponsiveContainer width="100%" height={350} className="p-3">
       <LineChart data={data}>
         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e0e0e0" />
         <XAxis
@@ -25,15 +24,15 @@ export function Overview({ data }) {
           content={({ active, payload }) => {
             if (active && payload && payload.length) {
               return (
-                <div className="rounded-lg border bg-background p-3 shadow-md">
+                <div className="rounded-lg border bg-background p-3 shadow-md ">
                   <div className="grid grid-cols-2 gap-4">
                     <div className="flex flex-col">
                       <span className="text-[0.70rem] uppercase text-muted-foreground font-medium">Income</span>
-                      <span className="font-bold text-[#1976d2] text-lg">${payload[0].value}</span>
+                      <span className="font-bold text-[#1976d2] text-lg">₹{payload[0].value}</span>
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[0.70rem] uppercase text-muted-foreground font-medium">Expenses</span>
-                      <span className="font-bold text-[#f44336] text-lg">${payload[1].value}</span>
+                      <span className="font-bold text-[#f44336] text-lg">₹{payload[1].value}</span>
                     </div>
                   </div>
                 </div>
