@@ -112,10 +112,10 @@ export default function DashboardPage() {
                 <PieChart className="h-4 w-4" />
                 <span>Overview</span>
               </TabsTrigger>
-              <TabsTrigger value="budgets" className="flex items-center gap-2">
+              {/* <TabsTrigger value="budgets" className="flex items-center gap-2">
                 <BarChart className="h-4 w-4" />
                 <span>Budgets</span>
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="transactions" className="flex items-center gap-2">
                 <List className="h-4 w-4" />
                 <span>Transactions</span>
@@ -147,7 +147,7 @@ export default function DashboardPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="budgets" className="mt-6">
+            {/* <TabsContent value="budgets" className="mt-6">
               <Card className="dashboard-card">
                 <CardHeader>
                   <CardTitle className="font-montserrat">Budget Overview</CardTitle>
@@ -157,7 +157,7 @@ export default function DashboardPage() {
                   <BudgetOverview data={data.budgets} />
                 </CardContent>
               </Card>
-            </TabsContent>
+            </TabsContent> */}
 
             <TabsContent value="transactions" className="mt-6">
               <Card className="dashboard-card">

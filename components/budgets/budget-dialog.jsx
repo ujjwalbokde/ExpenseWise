@@ -1,29 +1,35 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle,
 } from "@/components/ui/dialog"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from "@/components/ui/select"
+
+import { addBudget, updateBudget } from "@/lib/api/budgets" // You should point this to your actual Supabase logic
+import { getCategories } from "@/lib/api/categories"
 
 const formSchema = z.object({
   category: z.string({ required_error: "Please select a category." }),
-  budget: z.string().refine((val) => !isNaN(Number.parseFloat(val)), { message: "Budget must be a number." }),
+  budget: z.string().refine((val) => !isNaN(Number.parseFloat(val)), {
+    message: "Budget must be a number.",
+  }),
 })
 
 export function BudgetDialog({ open, onOpenChange, onAdd, budget }) {
   const [isLoading, setIsLoading] = useState(false)
+  const [categories, setCategories] = useState([])
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -33,29 +39,36 @@ export function BudgetDialog({ open, onOpenChange, onAdd, budget }) {
     },
   })
 
+  useEffect(() => {
+    async function fetchCategories() {
+      const result = await getCategories()
+      setCategories(result)
+    }
+    fetchCategories()
+  }, [])
+  console.log(categories)
   async function onSubmit(values) {
     setIsLoading(true)
     try {
       const budgetAmount = Number.parseFloat(values.budget)
-
       const newBudget = {
-        id: budget?.id || Math.floor(Math.random() * 10000),
         category: values.category,
         budget: budgetAmount,
         spent: budget?.spent || 0,
       }
 
+      let result
       if (budget?.id) {
-        // For demo purposes, we're not actually calling the API
-        // await updateBudget(budget.id, newBudget)
+        result = await updateBudget(budget.id, newBudget)
       } else {
-        // For demo purposes, we're not actually calling the API
-        // await setBudget(newBudget)
+        result = await addBudget(newBudget)
       }
 
-      onAdd(newBudget)
-      onOpenChange(false)
-      form.reset()
+      if (result) {
+        onAdd(result)
+        onOpenChange(false)
+        form.reset()
+      }
     } catch (error) {
       console.error("Failed to save budget:", error)
     } finally {
@@ -87,15 +100,11 @@ export function BudgetDialog({ open, onOpenChange, onAdd, budget }) {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Food">Food</SelectItem>
-                      <SelectItem value="Housing">Housing</SelectItem>
-                      <SelectItem value="Transportation">Transportation</SelectItem>
-                      <SelectItem value="Entertainment">Entertainment</SelectItem>
-                      <SelectItem value="Utilities">Utilities</SelectItem>
-                      <SelectItem value="Health">Health</SelectItem>
-                      <SelectItem value="Shopping">Shopping</SelectItem>
-                      <SelectItem value="Education">Education</SelectItem>
-                      <SelectItem value="Other">Other</SelectItem>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -122,11 +131,7 @@ export function BudgetDialog({ open, onOpenChange, onAdd, budget }) {
                     <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
                     <span>Saving...</span>
                   </div>
-                ) : budget?.id ? (
-                  "Update Budget"
-                ) : (
-                  "Add Budget"
-                )}
+                ) : budget?.id ? "Update Budget" : "Add Budget"}
               </Button>
             </DialogFooter>
           </form>

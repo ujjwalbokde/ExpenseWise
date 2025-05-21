@@ -3,7 +3,7 @@ import { ArrowDownIcon, ArrowUpIcon, DollarSign, Percent, TrendingUp, TrendingDo
 
 export function DashboardCards({ data }) {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 ">
       <Card className="dashboard-card border-l-4 border-l-[#1976d2] dark:border-l-[#42a5f5]">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <CardTitle className="text-sm font-medium">Total Income</CardTitle>

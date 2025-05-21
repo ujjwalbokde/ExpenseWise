@@ -6,10 +6,39 @@ import { BarChart3, CreditCard, LayoutDashboard, LogOut, PieChart, Settings, Tag
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/sidebar-provider"
-
+import { getCurrentUser } from "@/lib/api/auth"
+import { useEffect, useState } from "react"
+import { logoutUser } from "@/lib/api/auth"
+import { checkUserLoggedIn } from "@/lib/api/auth"
+import { useRouter } from "next/navigation"
 export function AppSidebar() {
   const pathname = usePathname()
   const { isOpen, setIsOpen, isMobile } = useSidebar()
+  const [user, setUser] = useState(null)
+  const router = useRouter()
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const user = await getCurrentUser()
+        setUser(user)
+      } catch (err) {
+        console.error("Error fetching user:", err)
+      }
+    }
+
+    fetchUser()
+  }, [])
+
+  useEffect(() => {
+    const verifyLogin = async () => {
+      const isLoggedIn = await checkUserLoggedIn()
+      if (!isLoggedIn) {
+        router.push("/auth/login")
+      }
+    }
+
+    verifyLogin()
+  }, [router])
 
   const routes = [
     {
@@ -33,13 +62,13 @@ export function AppSidebar() {
       color: "text-[#e91e63] dark:text-[#f48fb1]",
       bgColor: "bg-[#e91e63]/10 dark:bg-[#f48fb1]/20",
     },
-    {
-      label: "Budgets",
-      icon: PieChart,
-      href: "/budgets",
-      color: "text-[#ff9800] dark:text-[#ffb74d]",
-      bgColor: "bg-[#ff9800]/10 dark:bg-[#ffb74d]/20",
-    },
+    // {
+    //   label: "Budgets",
+    //   icon: PieChart,
+    //   href: "/budgets",
+    //   color: "text-[#ff9800] dark:text-[#ffb74d]",
+    //   bgColor: "bg-[#ff9800]/10 dark:bg-[#ffb74d]/20",
+    // },
     {
       label: "Reports",
       icon: BarChart3,
@@ -56,9 +85,26 @@ export function AppSidebar() {
     },
   ]
 
+
+  const handleLogout = async () => {
+    try {
+      await logoutUser()
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      })
+      router.push("/auth/login")
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: error.message,
+      })
+    }
+  }
   if (!isOpen && !isMobile) {
     return (
-      <aside className="fixed left-0 top-0 z-30 flex h-screen w-16 flex-col border-r bg-background pt-16 animate-in slide-in-from-left duration-300">
+      <aside className=" fixed left-0 top-0 z-30 flex h-screen w-16 flex-col border-r bg-background pt-16 animate-in slide-in-from-left duration-300">
         <nav className="grid gap-2 px-2 py-4">
           {routes.map((route) => (
             <Link
@@ -103,8 +149,8 @@ export function AppSidebar() {
             <User className="h-5 w-5 text-primary" />
           </div>
           <div className="flex flex-col">
-            <span className="font-medium">John Doe</span>
-            <span className="text-xs text-muted-foreground">john.doe@example.com</span>
+          <span className="font-medium">{user && user.user_metadata.name}</span>
+            <span className="text-xs text-muted-foreground">{user && user.email}</span>
           </div>
         </div>
       </div>
@@ -129,6 +175,7 @@ export function AppSidebar() {
         <Link href="/auth/login">
           <Button
             variant="ghost"
+            onClick={handleLogout}
             className="w-full justify-start gap-3 hover:bg-red-50 hover:text-red-600 dark:hover:bg-red-900/20 dark:hover:text-red-400"
           >
             <LogOut className="h-5 w-5" />

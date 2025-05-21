@@ -51,7 +51,8 @@ export function BudgetList({ budgets, onEdit, onDelete }) {
     <>
       <div className="space-y-6">
         {budgets.map((budget) => {
-          const percentage = Math.round((budget.spent / budget.budget) * 100)
+          const percentage = Math.round((budget.spent / budget.budget) * 100)*-1
+          
           let progressColor = "bg-[#4caf50]"
 
           if (percentage > 90) {

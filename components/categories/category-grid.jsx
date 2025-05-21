@@ -17,6 +17,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { deleteCategory } from "@/lib/api/categories"; // adjust the import path as needed
 
 export function CategoryGrid({ categories, onEdit, onDelete }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
@@ -33,12 +34,19 @@ export function CategoryGrid({ categories, onEdit, onDelete }) {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
-    if (selectedCategory) {
-      onDelete(selectedCategory.id)
-      setDeleteDialogOpen(false)
-    }
+
+const confirmDelete = async () => {
+  if (!selectedCategory) return;
+
+  try {
+    await deleteCategory(selectedCategory.id);
+    onDelete(selectedCategory.id); // update UI after successful deletion
+    setDeleteDialogOpen(false);
+  } catch (error) {
+    console.error("Failed to delete category:", error.message);
+    // Optionally show an error notification here
   }
+};
 
   // Dynamically get the icon component
   const getIconComponent = (iconName) => {

@@ -7,12 +7,20 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
-import { registerUser } from "@/lib/api/auth"
 import { ThemeToggle } from "@/components/theme-toggle"
+import { supabase } from "../../../lib/supabaseClient" // already imported — do NOT call createClientComponentClient()
 
+// Schema
 const formSchema = z
   .object({
     name: z.string().min(2, { message: "Name must be at least 2 characters" }),
@@ -43,21 +51,39 @@ export default function RegisterPage() {
   async function onSubmit(values) {
     setIsLoading(true)
     try {
-      const data = await registerUser({
-        name: values.name,
+      const { data, error } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
+        options: {
+          data: {
+            name: values.name,
+          },
+        },
       })
+      router.push("/auth/login")  ;
+      if (error) throw error
+
+      if (data.user) {
+        const { error: profileError } = await supabase.from("profiles").insert({
+          id: data.user.id,
+          email: data.user.email,
+          name: values.name,
+        })
+
+        if (profileError) throw profileError
+      }
+
       toast({
-        title: "Registration successful",
-        description: "Your account has been created. You can now log in.",
+        title: "Registration successful!",
+        description: "Please check your email to confirm your account.",
       })
+
       router.push("/auth/login")
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Registration failed",
-        description: "There was an error creating your account. Please try again.",
+        description: error.message || "There was an error creating your account.",
       })
     } finally {
       setIsLoading(false)
@@ -74,6 +100,7 @@ export default function RegisterPage() {
           <h1 className="text-3xl font-bold gradient-text">Create an Account</h1>
           <p className="text-gray-500 dark:text-gray-400">Sign up to start managing your finances</p>
         </div>
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -83,11 +110,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="John Doe"
-                      {...field}
-                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <Input placeholder="Your name" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -100,11 +123,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input
-                      placeholder="your.email@example.com"
-                      {...field}
-                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <Input placeholder="you@example.com" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -117,12 +136,7 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      {...field}
-                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <Input type="password" placeholder="••••••" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -135,33 +149,19 @@ export default function RegisterPage() {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
-                      type="password"
-                      placeholder="••••••••"
-                      {...field}
-                      className="transition-all duration-200 focus:ring-2 focus:ring-primary/50"
-                    />
+                    <Input type="password" placeholder="••••••" {...field} disabled={isLoading} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button
-              type="submit"
-              className="w-full bg-primary hover:bg-primary/90 transition-all duration-300"
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
-                  <span>Creating account...</span>
-                </div>
-              ) : (
-                "Sign Up"
-              )}
+
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Creating Account..." : "Create Account"}
             </Button>
           </form>
         </Form>
+
         <div className="mt-4 text-center text-sm">
           <p>
             Already have an account?{" "}

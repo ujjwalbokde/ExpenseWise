@@ -5,6 +5,8 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
+import { addCategory, updateCategory } from "@/lib/api/categories"
+import { supabase } from "@/lib/supabaseClient"
 import {
   Dialog,
   DialogContent,
@@ -37,33 +39,48 @@ export function CategoryDialog({ open, onOpenChange, onAdd, category }) {
     },
   })
 
-  async function onSubmit(values) {
-    setIsLoading(true)
-    try {
-      const newCategory = {
-        id: category?.id || Math.floor(Math.random() * 10000),
-        name: values.name,
-        type: values.type,
-        icon: values.icon,
-      }
 
-      if (category?.id) {
-        // For demo purposes, we're not actually calling the API
-        // await updateCategory(category.id, newCategory)
-      } else {
-        // For demo purposes, we're not actually calling the API
-        // await addCategory(newCategory)
-      }
+async function onSubmit(values) {
+  setIsLoading(true)
+  try {
+    // Get the current user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser()
 
-      onAdd(newCategory)
-      onOpenChange(false)
-      form.reset()
-    } catch (error) {
-      console.error("Failed to save category:", error)
-    } finally {
-      setIsLoading(false)
+    if (userError || !user) {
+      throw new Error('User not authenticated')
     }
+
+    const categoryData = {
+      name: values.name,
+      type: values.type,
+      icon: values.icon,
+      user_id: user.id, // important to set the user_id here
+    }
+
+    let savedCategory
+
+    if (category?.id) {
+      // Update existing category (make sure updateCategory also handles user_id correctly)
+      savedCategory = await updateCategory(category.id, categoryData)
+    } else {
+      // Add new category
+      savedCategory = await addCategory(categoryData)
+    }
+
+    onAdd(savedCategory)
+    onOpenChange(false)
+    form.reset()
+  } catch (error) {
+    console.error('Failed to save category:', error)
+  } finally {
+    setIsLoading(false)
   }
+}
+
+
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

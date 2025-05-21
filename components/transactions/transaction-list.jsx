@@ -17,7 +17,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { TransactionDialog } from "@/components/transactions/transaction-dialog"
-
+import { deleteTransaction } from "@/lib/api/transactions" // 🔥 Import your lib function
 export function TransactionList({ transactions, onEdit, onDelete }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -33,12 +33,19 @@ export function TransactionList({ transactions, onEdit, onDelete }) {
     setDeleteDialogOpen(true)
   }
 
-  const confirmDelete = () => {
-    if (selectedTransaction) {
-      onDelete(selectedTransaction.id)
-      setDeleteDialogOpen(false)
+const confirmDelete = async () => {
+  if (selectedTransaction) {
+    try {
+      await deleteTransaction(selectedTransaction.id); // 🔥 Call your lib function
+      onDelete(selectedTransaction.id); // 🔄 Update state in parent
+    } catch (error) {
+      console.error("Failed to delete transaction:", error);
+    } finally {
+      setDeleteDialogOpen(false);
     }
   }
+};
+
 
   if (transactions.length === 0) {
     return (

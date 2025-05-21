@@ -95,7 +95,7 @@ export default function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-4 animate-in fade-in duration-300">
+    <div className="space-y-4 animate-in fade-in duration-300 ">
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
         <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
         <Button onClick={() => setDialogOpen(true)} className="group bg-[#1976d2] hover:bg-[#115293]">
