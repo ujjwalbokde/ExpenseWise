@@ -28,12 +28,12 @@ export default function Home() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/20">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-              <div className="flex flex-col justify-center space-y-4">
+              <div className="flex flex-col justify-center space-y-4 mx-24">
                 <div className="space-y-2">
                   <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl font-montserrat">
                     <span className="gradient-text">Take Control</span> of Your Finances
                   </h1>
-                  <p className="max-w-[600px] text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                  <p className="max-w-[600px]  text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                     ExpenseWise is a user-friendly web platform designed to empower you to take control of your personal
                     finances with beautiful visualizations and smart insights.
                   </p>
@@ -60,8 +60,8 @@ export default function Home() {
                 <img
                   alt="ExpenseWise Dashboard Preview"
                   className="rounded-lg object-cover shadow-xl"
-                  src="/placeholder.svg?height=400&width=600"
-                  width={600}
+                  src="/home.svg"
+                  width={400}
                   height={400}
                 />
               </div>

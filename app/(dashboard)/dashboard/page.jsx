@@ -11,7 +11,7 @@ import { BudgetOverview } from "@/components/dashboard/budget-overview"
 import { getDashboardData } from "@/lib/api/dashboard"
 import { useToast } from "@/components/ui/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
-import { BarChart3, LineChart, PieChart } from "lucide-react"
+import { BarChart, List, PieChart } from "lucide-react"
 import { useSidebar } from "@/components/sidebar-provider"
 
 export default function DashboardPage() {
@@ -41,7 +41,7 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-in fade-in duration-300">
+      <div className={`space-y-6 animate-in fade-in duration-300 ${isOpen ? "ml-4" : "ml-2"}`}>
         <div className="flex items-center justify-between">
           <Skeleton className="h-8 w-64" />
           <Skeleton className="h-10 w-32" />
@@ -103,29 +103,28 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-300 page-transition">
+    <div className={`space-y-6 animate-in fade-in duration-300 page-transition ${isOpen ? "ml-4" : "ml-2"}`}>
       <div className="flex flex-col space-y-2 md:flex-row md:items-center md:justify-between md:space-y-0">
-        <h2 className="text-3xl font-bold tracking-tight font-montserrat">Dashboard</h2>
-        <div className="w-full md:w-auto">
-          <Tabs defaultValue="overview" className="w-full max-w-md">
-            <TabsList className="grid w-full grid-cols-3">
+        <div className="w-full">
+          <Tabs defaultValue="overview" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 max-w-lg">
               <TabsTrigger value="overview" className="flex items-center gap-2">
-                <LineChart className="h-4 w-4" />
+                <PieChart className="h-4 w-4" />
                 <span>Overview</span>
               </TabsTrigger>
-              <TabsTrigger value="analytics" className="flex items-center gap-2">
-                <BarChart3 className="h-4 w-4" />
-                <span>Analytics</span>
+              <TabsTrigger value="budgets" className="flex items-center gap-2">
+                <BarChart className="h-4 w-4" />
+                <span>Budgets</span>
               </TabsTrigger>
-              <TabsTrigger value="reports" className="flex items-center gap-2">
-                <PieChart className="h-4 w-4" />
-                <span>Reports</span>
+              <TabsTrigger value="transactions" className="flex items-center gap-2">
+                <List className="h-4 w-4" />
+                <span>Transactions</span>
               </TabsTrigger>
             </TabsList>
 
-            <TabsContent value="overview" className="space-y-6 mt-6">
-             
-
+            <TabsContent value="overview" className="mt-6 space-y-6">
+              <DashboardCards data={data.summary} />
+              
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                 <Card className="lg:col-span-4 dashboard-card">
                   <CardHeader>
@@ -146,7 +145,9 @@ export default function DashboardPage() {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
 
+            <TabsContent value="budgets" className="mt-6">
               <Card className="dashboard-card">
                 <CardHeader>
                   <CardTitle className="font-montserrat">Budget Overview</CardTitle>
@@ -156,7 +157,9 @@ export default function DashboardPage() {
                   <BudgetOverview data={data.budgets} />
                 </CardContent>
               </Card>
+            </TabsContent>
 
+            <TabsContent value="transactions" className="mt-6">
               <Card className="dashboard-card">
                 <CardHeader>
                   <CardTitle className="font-montserrat">Recent Transactions</CardTitle>
@@ -164,34 +167,6 @@ export default function DashboardPage() {
                 </CardHeader>
                 <CardContent>
                   <RecentTransactions data={data.recentTransactions} />
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="analytics" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-montserrat">Analytics</CardTitle>
-                  <CardDescription>Detailed analysis of your financial data</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-muted-foreground">Analytics content coming soon...</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="reports" className="space-y-6 mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="font-montserrat">Reports</CardTitle>
-                  <CardDescription>Generate and view financial reports</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-center py-8">
-                    <p className="text-muted-foreground">Reports content coming soon...</p>
-                  </div>
                 </CardContent>
               </Card>
             </TabsContent>
