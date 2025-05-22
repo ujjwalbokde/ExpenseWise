@@ -16,7 +16,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
+import { toast } from "@/hooks/use-toast"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { supabase } from "../../../lib/supabaseClient" // already imported — do NOT call createClientComponentClient()
 
@@ -36,7 +36,6 @@ const formSchema = z
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
-  const { toast } = useToast()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
@@ -60,20 +59,10 @@ export default function RegisterPage() {
           },
         },
       })
-      router.push("/auth/login")  ;
       if (error) throw error
 
-      if (data.user) {
-        const { error: profileError } = await supabase.from("profiles").insert({
-          id: data.user.id,
-          email: data.user.email,
-          name: values.name,
-        })
-
-        if (profileError) throw profileError
-      }
-
       toast({
+        variant: "success",
         title: "Registration successful!",
         description: "Please check your email to confirm your account.",
       })

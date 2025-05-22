@@ -61,6 +61,56 @@ export default function ReportsPage() {
     fetchData();
   }, [toast]);
 
+const handleGenerateReport = async () => {
+  try {
+    setIsLoading(true);
+    
+    const params = {
+      reportType,
+      format: 'pdf', // or get this from a state if you have format selection
+      ...(reportType === 'monthly' && {
+        month: date.getMonth() + 1,
+        year: date.getFullYear(),
+      }),
+    };
+
+    const response = await fetch('/api/reports', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to generate report');
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${reportType}_report.${params.format}`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    a.remove();
+
+    toast({
+      title: "Report Downloaded",
+      description: `Your ${reportType === "monthly" ? "Monthly" : "Full"} report has been downloaded.`,
+    });
+  } catch (error) {
+    toast({
+      variant: "destructive",
+      title: "Error",
+      description: "Failed to generate report. Please try again.",
+    });
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   const renderValue = (value, color) => (
     <div className={`text-2xl font-bold text-[${color}] flex items-center gap-1`}>
       <IndianRupeeIcon className="w-5 h-5" />
@@ -74,10 +124,7 @@ export default function ReportsPage() {
         <h2 className="text-3xl font-bold tracking-tight font-montserrat">
           Reports
         </h2>
-        <Button className="group bg-[#1976d2] hover:bg-[#115293]">
-          <Download className="mr-2 h-4 w-4" />
-          Export Report
-        </Button>
+        
       </div>
 
       {/* Summary Cards */}
@@ -150,36 +197,36 @@ export default function ReportsPage() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="monthly">Monthly Report</SelectItem>
-                  <SelectItem value="quarterly">Quarterly Report</SelectItem>
-                  <SelectItem value="annual">Annual Report</SelectItem>
-                  <SelectItem value="custom">Custom Date Range</SelectItem>
+                  <SelectItem value="full">Full Report</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            {/* Date Picker */}
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Date</label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {format(date, "MMMM yyyy")}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0">
-                  <Calendar
-                    mode="single"
-                    selected={date}
-                    onSelect={setDate}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
+            {/* Date Picker - Only show for monthly report */}
+            {reportType === "monthly" && (
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Month</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="w-full justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {format(date, "MMMM yyyy")}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={date}
+                      onSelect={setDate}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
 
             {/* Format */}
             <div className="space-y-2">
@@ -191,81 +238,20 @@ export default function ReportsPage() {
                 <SelectContent>
                   <SelectItem value="pdf">PDF Document</SelectItem>
                   <SelectItem value="excel">Excel Spreadsheet</SelectItem>
-                  <SelectItem value="csv">CSV File</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          <Button className="mt-6 bg-[#1976d2] hover:bg-[#115293]">
+          <Button 
+            className="mt-6 bg-[#1976d2] hover:bg-[#115293]"
+            onClick={handleGenerateReport}
+          >
             <FileText className="mr-2 h-4 w-4" />
             Generate Report
           </Button>
         </CardContent>
       </Card>
-      {/* 
-      <Tabs defaultValue="income" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
-          <TabsTrigger value="income">Income</TabsTrigger>
-          <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="savings">Savings</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="income" className="space-y-4 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Income Reports</CardTitle>
-              <CardDescription>View and analyze your income sources</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <LineChart className="h-16 w-16 mx-auto text-[#1976d2] mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Income Reports Coming Soon</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Detailed income reports with charts and analysis will be available in the next update.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="expenses" className="space-y-4 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Expense Reports</CardTitle>
-              <CardDescription>View and analyze your spending patterns</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <BarChart3 className="h-16 w-16 mx-auto text-[#f44336] mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Expense Reports Coming Soon</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Detailed expense reports with charts and analysis will be available in the next update.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="savings" className="space-y-4 mt-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Savings Reports</CardTitle>
-              <CardDescription>View and analyze your savings progress</CardDescription>
-            </CardHeader>
-            <CardContent className="h-[400px] flex items-center justify-center">
-              <div className="text-center">
-                <PieChart className="h-16 w-16 mx-auto text-[#4caf50] mb-4 opacity-50" />
-                <h3 className="text-lg font-medium mb-2">Savings Reports Coming Soon</h3>
-                <p className="text-muted-foreground max-w-md">
-                  Detailed savings reports with charts and analysis will be available in the next update.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs> */}
     </div>
   );
 }
-

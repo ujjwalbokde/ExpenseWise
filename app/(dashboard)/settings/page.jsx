@@ -1,39 +1,30 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import * as z from "zod"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { useToast } from "@/components/ui/use-toast"
-
+import { toast } from "@/hooks/use-toast"
+import { getCurrentUser } from "@/lib/api/auth"
+import { supabase } from "@/lib/supabaseClient"
+import { useRouter } from "next/navigation"
 const profileFormSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  bio: z.string().optional(),
-})
-
-const accountFormSchema = z.object({
-  currency: z.string({
-    required_error: "Please select a currency.",
-  }),
-  dateFormat: z.string({
-    required_error: "Please select a date format.",
-  }),
-  notifications: z.boolean().default(true),
-  darkMode: z.boolean().default(false),
 })
 
 const securityFormSchema = z
   .object({
     currentPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
-    newPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
+    newPassword: z.string()
+      .min(6, { message: "Password must be at least 6 characters." })
+      .refine((val) => /[0-9]/.test(val), "Password must contain at least one number")
+      .refine((val) => /[!@#$%^&*(),.?":{}|<>]/.test(val), "Password must contain at least one special character"),
     confirmPassword: z.string().min(6, { message: "Password must be at least 6 characters." }),
   })
   .refine((data) => data.newPassword === data.confirmPassword, {
@@ -43,25 +34,32 @@ const securityFormSchema = z
 
 export default function SettingsPage() {
   const [isLoading, setIsLoading] = useState(false)
-  const { toast } = useToast()
+  const [user, setUser] = useState(null)
+  const router = useRouter()
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const data = await getCurrentUser()
+        setUser(data)
+      } catch (error) {
+        console.error('Error fetching user:', error)
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load user data",
+        })
+      }
+    }
+
+    fetchUser()
+  }, [])
 
   const profileForm = useForm({
     resolver: zodResolver(profileFormSchema),
-    defaultValues: {
-      name: "John Doe",
-      email: "john.doe@example.com",
-      bio: "I'm a software developer interested in personal finance.",
-    },
-  })
-
-  const accountForm = useForm({
-    resolver: zodResolver(accountFormSchema),
-    defaultValues: {
-      currency: "USD",
-      dateFormat: "MM/DD/YYYY",
-      notifications: true,
-      darkMode: false,
-    },
+    values: {
+      name: user?.user_metadata?.name || "",
+      email: user?.email || "",
+    }
   })
 
   const securityForm = useForm({
@@ -73,42 +71,45 @@ export default function SettingsPage() {
     },
   })
 
-  function onProfileSubmit(data) {
+  async function onSecuritySubmit(data) {
     setIsLoading(true)
-    setTimeout(() => {
-      toast({
-        title: "Profile updated",
-        description: "Your profile has been updated successfully.",
+    try {
+      // First verify current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email,
+        password: data.currentPassword,
       })
-      setIsLoading(false)
-    }, 1000)
-  }
 
-  function onAccountSubmit(data) {
-    setIsLoading(true)
-    setTimeout(() => {
-      toast({
-        title: "Account settings updated",
-        description: "Your account settings have been updated successfully.",
+      if (signInError) {
+        throw new Error("Current password is incorrect")
+      }
+
+      // If current password is correct, update to new password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: data.newPassword,
       })
-      setIsLoading(false)
-    }, 1000)
-  }
 
-  function onSecuritySubmit(data) {
-    setIsLoading(true)
-    setTimeout(() => {
+      if (updateError) {
+        throw updateError
+      }
+
       toast({
-        title: "Password changed",
+        title: "Password Updated",
         description: "Your password has been changed successfully.",
+        variant: "success",
       })
-      securityForm.reset({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
+
+      securityForm.reset()
+      router.push("/auth/login")
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Password Change Failed",
+        description: error.message || "An error occurred while changing your password",
       })
+    } finally {
       setIsLoading(false)
-    }, 1000)
+    }
   }
 
   return (
@@ -128,11 +129,11 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Profile</CardTitle>
-              <CardDescription>Manage your public profile information.</CardDescription>
+              <CardDescription>View your profile information.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...profileForm}>
-                <form onSubmit={profileForm.handleSubmit(onProfileSubmit)} className="space-y-4">
+                <form className="space-y-4">
                   <FormField
                     control={profileForm.control}
                     name="name"
@@ -140,7 +141,7 @@ export default function SettingsPage() {
                       <FormItem>
                         <FormLabel>Name</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} disabled />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -153,137 +154,12 @@ export default function SettingsPage() {
                       <FormItem>
                         <FormLabel>Email</FormLabel>
                         <FormControl>
-                          <Input {...field} />
+                          <Input {...field} disabled />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={profileForm.control}
-                    name="bio"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Bio</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormDescription>A brief description about yourself.</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" disabled={isLoading} className="bg-[#1976d2] hover:bg-[#115293]">
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
-                        <span>Saving...</span>
-                      </div>
-                    ) : (
-                      "Save Changes"
-                    )}
-                  </Button>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="account" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Settings</CardTitle>
-              <CardDescription>Manage your account preferences.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...accountForm}>
-                <form onSubmit={accountForm.handleSubmit(onAccountSubmit)} className="space-y-4">
-                  <FormField
-                    control={accountForm.control}
-                    name="currency"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Currency</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a currency" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="USD">USD - US Dollar</SelectItem>
-                            <SelectItem value="EUR">EUR - Euro</SelectItem>
-                            <SelectItem value="GBP">GBP - British Pound</SelectItem>
-                            <SelectItem value="JPY">JPY - Japanese Yen</SelectItem>
-                            <SelectItem value="CAD">CAD - Canadian Dollar</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={accountForm.control}
-                    name="dateFormat"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date Format</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select a date format" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="MM/DD/YYYY">MM/DD/YYYY</SelectItem>
-                            <SelectItem value="DD/MM/YYYY">DD/MM/YYYY</SelectItem>
-                            <SelectItem value="YYYY-MM-DD">YYYY-MM-DD</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={accountForm.control}
-                    name="notifications"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Notifications</FormLabel>
-                          <FormDescription>Receive notifications about your account activity.</FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={accountForm.control}
-                    name="darkMode"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
-                        <div className="space-y-0.5">
-                          <FormLabel className="text-base">Dark Mode</FormLabel>
-                          <FormDescription>Enable dark mode for the application.</FormDescription>
-                        </div>
-                        <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <Button type="submit" disabled={isLoading} className="bg-[#1976d2] hover:bg-[#115293]">
-                    {isLoading ? (
-                      <div className="flex items-center gap-2">
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-background border-t-transparent"></div>
-                        <span>Saving...</span>
-                      </div>
-                    ) : (
-                      "Save Changes"
-                    )}
-                  </Button>
                 </form>
               </Form>
             </CardContent>
@@ -294,7 +170,7 @@ export default function SettingsPage() {
           <Card>
             <CardHeader>
               <CardTitle>Security</CardTitle>
-              <CardDescription>Manage your security settings.</CardDescription>
+              <CardDescription>Change your password.</CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...securityForm}>

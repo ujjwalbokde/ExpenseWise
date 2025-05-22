@@ -28,7 +28,7 @@ export function CategoryBreakdown({ data }) {
             ))}
           </Pie>
           <Tooltip
-            formatter={(value) => [`$${value}`, "Amount"]}
+            formatter={(value) => [`₹${value}`, "Amount"]}
             contentStyle={{
               backgroundColor: "hsl(var(--background))",
               border: "1px solid hsl(var(--border))",

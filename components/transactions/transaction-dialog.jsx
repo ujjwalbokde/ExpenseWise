@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/select";
 
 import { getCategories } from "@/lib/api/categories"; // Make sure this function returns categories array [{id, name, icon, etc}]
-
+import { toast } from "@/hooks/use-toast";
 const formSchema = z.object({
   description: z.string().min(2, { message: "Description must be at least 2 characters." }),
   amount: z.string().refine((val) => !isNaN(Number.parseFloat(val)), { message: "Amount must be a number." }),
@@ -111,7 +111,17 @@ export function TransactionDialog({ open, onOpenChange, onAdd, transaction }) {
       onAdd(savedTransaction);
       onOpenChange(false);
       form.reset();
+      toast({
+      title: "Transaction saved",
+      description: "Your transaction was saved successfully.",
+      variant: "success", // if your toast supports variants
+    });
     } catch (error) {
+      toast({
+      title: "Error",
+      description: "Failed to save transaction. Please try again.",
+      variant: "destructive", // if your toast supports variants
+    });
       console.error("Failed to save transaction:", error);
     } finally {
       setIsLoading(false);

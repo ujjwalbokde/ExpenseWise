@@ -17,7 +17,7 @@ export function Overview({ data }) {
           tickLine={false}
           axisLine={false}
           tick={{ fill: "hsl(var(--muted-foreground))" }}
-          tickFormatter={(value) => `$${value}`}
+          tickFormatter={(value) => `₹${value}`}
           dx={-10}
         />
         <Tooltip

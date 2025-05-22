@@ -69,7 +69,7 @@ export function RecentTransactions({ data }) {
                           : "text-[#f44336] dark:text-[#ef5350] font-medium"
                       }
                     >
-                      ${Math.abs(transaction.amount).toLocaleString()}
+                      ₹{Math.abs(transaction.amount).toLocaleString()}
                     </span>
                   </div>
                 </TableCell>

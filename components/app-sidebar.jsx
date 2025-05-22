@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { BarChart3, CreditCard, LayoutDashboard, LogOut, PieChart, Settings, Tag, User } from "lucide-react"
+import { BarChart3, CreditCard, LayoutDashboard, LogOut, PieChart, Settings, Tag, User, VariableIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useSidebar } from "@/components/sidebar-provider"
@@ -11,6 +11,7 @@ import { useEffect, useState } from "react"
 import { logoutUser } from "@/lib/api/auth"
 import { checkUserLoggedIn } from "@/lib/api/auth"
 import { useRouter } from "next/navigation"
+import toast from "@/hooks/use-toast"
 export function AppSidebar() {
   const pathname = usePathname()
   const { isOpen, setIsOpen, isMobile } = useSidebar()
@@ -92,6 +93,7 @@ export function AppSidebar() {
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
+        variant: "success",
       })
       router.push("/auth/login")
     } catch (error) {
@@ -142,7 +144,7 @@ export function AppSidebar() {
   }
 
   return (
-    <aside className="fixed left-0 top-0 z-30 flex h-screen w-64 flex-col border-r bg-background pt-16 animate-in slide-in-from-left duration-300">
+    <aside className="fixed left-0 top-0 z-30 flex h-screen w-64 flex-col border-r bg-background pt-20 animate-in slide-in-from-left duration-300 ">
       <div className="flex items-center justify-between px-4 py-2">
         <div className="flex items-center gap-2">
           <div className="rounded-full bg-primary/10 p-2">

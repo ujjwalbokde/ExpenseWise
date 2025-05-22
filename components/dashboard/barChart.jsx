@@ -1,6 +1,13 @@
 "use client"
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer
 } from "recharts"
 
 export function MonthlyComparisonChart({ data }) {
@@ -20,9 +27,17 @@ export function MonthlyComparisonChart({ data }) {
       >
         <CartesianGrid strokeDasharray="3 3" />
         <XAxis dataKey="month" />
-        <YAxis />
-        <Tooltip />
+
+        <YAxis
+          tickFormatter={(value) => `₹${value}`}
+        />
+
+        <Tooltip
+          formatter={(value, name) => [`₹${value}`, name.charAt(0).toUpperCase() + name.slice(1)]}
+        />
+
         <Legend />
+
         <Bar dataKey="income" fill="#3b82f6" radius={[4, 4, 0, 0]} />
         <Bar dataKey="expenses" fill="#ef4444" radius={[4, 4, 0, 0]} />
         <Bar dataKey="savings" fill="#22c55e" radius={[4, 4, 0, 0]} />

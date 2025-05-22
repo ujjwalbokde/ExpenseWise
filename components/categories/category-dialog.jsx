@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
-
+import { toast } from "@/hooks/use-toast"
 const formSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   type: z.enum(["income", "expense"], { required_error: "Please select a type." }),
@@ -73,7 +73,17 @@ async function onSubmit(values) {
     onAdd(savedCategory)
     onOpenChange(false)
     form.reset()
+    toast({
+      title: "Category saved",
+      description: "Your category has been saved successfully.",
+      variant: "success", // if your toast supports variants
+    });
   } catch (error) {
+    toast({
+      title: "Error",
+      description: "Failed to save category. Please try again.",
+      variant: "destructive", // if your toast supports variants
+    });
     console.error('Failed to save category:', error)
   } finally {
     setIsLoading(false)
@@ -149,7 +159,7 @@ async function onSubmit(values) {
                       <SelectItem value="Heart">Health</SelectItem>
                       <SelectItem value="ShoppingBag">Shopping</SelectItem>
                       <SelectItem value="BookOpen">Education</SelectItem>
-                      <SelectItem value="DollarSign">Income</SelectItem>
+                      <SelectItem value="IndianRupeeIcon">Income</SelectItem>
                       <SelectItem value="Gift">Gifts</SelectItem>
                       <SelectItem value="Tag">General</SelectItem>
                     </SelectContent>

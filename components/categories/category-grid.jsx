@@ -18,7 +18,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { deleteCategory } from "@/lib/api/categories"; // adjust the import path as needed
-
+import { toast } from "@/hooks/use-toast"
 export function CategoryGrid({ categories, onEdit, onDelete }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -42,7 +42,17 @@ const confirmDelete = async () => {
     await deleteCategory(selectedCategory.id);
     onDelete(selectedCategory.id); // update UI after successful deletion
     setDeleteDialogOpen(false);
+    toast({
+      title: "Category deleted",
+      description: "The category has been successfully deleted.",
+      variant: "success",
+    });
   } catch (error) {
+    toast({
+      title: "Error deleting category",
+      description: "There was an error deleting the category. Please try again.",
+      variant: "destructive",
+    });
     console.error("Failed to delete category:", error.message);
     // Optionally show an error notification here
   }

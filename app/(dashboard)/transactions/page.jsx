@@ -105,11 +105,10 @@ export default function TransactionsPage() {
       </div>
 
       <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full max-w-md grid-cols-4">
+        <TabsList className="grid w-full max-w-md grid-cols-3">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="income">Income</TabsTrigger>
           <TabsTrigger value="expenses">Expenses</TabsTrigger>
-          <TabsTrigger value="transfers">Transfers</TabsTrigger>
         </TabsList>
 
         <div className="my-4 flex items-center gap-2">
@@ -170,17 +169,7 @@ export default function TransactionsPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="transfers" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Transfers</CardTitle>
-              <CardDescription>View and manage your transfer transactions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-center text-muted-foreground py-8">No transfer transactions found.</p>
-            </CardContent>
-          </Card>
-        </TabsContent>
+        
       </Tabs>
 
       <TransactionDialog open={dialogOpen} onOpenChange={setDialogOpen} onAdd={handleAddTransaction} />

@@ -16,7 +16,7 @@ export function SavingsChart({ data }) {
   }))
 
   return (
-    <div className="rounded-xl p-4 shadow-lg">
+    <div className="rounded-xl p-3">
       <ResponsiveContainer width="100%" height={300}>
         <AreaChart data={savingsData} margin={{ top: 10, right: 20, left: 10, bottom: 0 }}>
           <defs>
@@ -26,10 +26,8 @@ export function SavingsChart({ data }) {
             </linearGradient>
           </defs>
 
-          {/* Subtle grid for better readability */}
           <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
 
-          {/* X Axis: Month */}
           <XAxis
             dataKey="month"
             tick={{ fill: "#64748b", fontSize: 12 }}
@@ -37,16 +35,16 @@ export function SavingsChart({ data }) {
             tickLine={false}
           />
 
-          {/* Y Axis: Savings */}
           <YAxis
             tick={{ fill: "#64748b", fontSize: 12 }}
             axisLine={false}
             tickLine={false}
-            width={50}
+            width={60}
+            tickFormatter={(value) => `₹${value}`}
           />
 
-          {/* Tooltip: Custom styling */}
           <Tooltip
+            formatter={(value) => [`₹${value}`, "Savings"]}
             contentStyle={{
               backgroundColor: "#1e293b",
               border: "none",
@@ -58,7 +56,6 @@ export function SavingsChart({ data }) {
             cursor={{ stroke: "#16a34a", strokeWidth: 1 }}
           />
 
-          {/* Area Line */}
           <Area
             type="monotone"
             dataKey="savings"

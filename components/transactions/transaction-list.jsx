@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog"
 import { TransactionDialog } from "@/components/transactions/transaction-dialog"
 import { deleteTransaction } from "@/lib/api/transactions" // 🔥 Import your lib function
+import { toast } from "@/hooks/use-toast"
 export function TransactionList({ transactions, onEdit, onDelete }) {
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -38,7 +39,17 @@ const confirmDelete = async () => {
     try {
       await deleteTransaction(selectedTransaction.id); // 🔥 Call your lib function
       onDelete(selectedTransaction.id); // 🔄 Update state in parent
+      toast({
+        title: "Transaction deleted",
+        description: "The transaction has been successfully deleted.",
+        variant: "success",
+      });
     } catch (error) {
+      toast({
+        title: "Error deleting transaction",
+        description: "There was an error deleting the transaction. Please try again.",
+        variant: "destructive",
+      });
       console.error("Failed to delete transaction:", error);
     } finally {
       setDeleteDialogOpen(false);
@@ -87,7 +98,7 @@ const confirmDelete = async () => {
                       <ArrowDownIcon className="h-4 w-4 text-[#f44336]" />
                     )}
                     <span className={transaction.amount > 0 ? "text-[#4caf50]" : "text-[#f44336]"}>
-                      ${Math.abs(transaction.amount).toLocaleString()}
+                      ₹{Math.abs(transaction.amount).toLocaleString()}
                     </span>
                   </div>
                 </TableCell>
