@@ -1,9 +1,27 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ArrowRight, BarChart3, PieChart, Wallet } from "lucide-react"
 import { ThemeToggle } from "@/components/theme-toggle"
-
+import { checkUserLoggedIn } from "@/lib/api/auth"
+import { useEffect,useState } from "react"
+import { useRouter } from "next/navigation"
 export default function Home() {
+  const router = useRouter()
+  // Check if user is logged in when the component mounts
+  const [isUser, setisUser] = useState(false)
+    useEffect(() => {
+      const verifyLogin = async () => {
+        const isLoggedIn = await checkUserLoggedIn()
+        setisUser(isLoggedIn)
+        if (isLoggedIn) {
+          // Redirect to dashboard if user is logged in
+          router.push("/dashboard")
+        }
+      }
+  
+      verifyLogin()
+    }, [router])
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-background">
@@ -28,9 +46,9 @@ export default function Home() {
         <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-blue-50 dark:from-background dark:to-blue-950/20">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-2 lg:gap-12">
-              <div className="flex flex-col justify-center space-y-4 mx-24">
+              <div className="flex flex-col justify-center space-y-4 mx-5">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl font-montserrat">
+                  <h1 className="text-3xl font-bold tracking-tighter sm:text-7xl font-montserrat mb-3">
                     <span className="gradient-text">Take Control</span> of Your Finances
                   </h1>
                   <p className="max-w-[600px]  text-gray-600 dark:text-gray-300 md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
@@ -39,7 +57,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/auth/register">
+                  <Link href={isUser ? "/dashboard" : "/auth/register"}>
                     <Button size="lg" className="group bg-primary hover:bg-primary/90 animated-button font-medium">
                       Get Started
                       <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />

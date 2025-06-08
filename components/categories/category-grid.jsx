@@ -83,7 +83,7 @@ const confirmDelete = async () => {
             <div className="absolute right-2 top-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 ">
                     <MoreHorizontal className="h-4 w-4" />
                     <span className="sr-only">Open menu</span>
                   </Button>
