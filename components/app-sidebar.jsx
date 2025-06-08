@@ -173,7 +173,7 @@ export function AppSidebar() {
           </Link>
         ))}
       </nav>
-      <div className="mt-auto border-t px-2 py-4">
+      <div className="mt-auto border-t px-2 py-4 pb-10">
         <Link href="/auth/login">
           <Button
             variant="ghost"
