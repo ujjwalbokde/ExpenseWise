@@ -172,8 +172,7 @@ export function AppSidebar() {
             <span className={pathname === route.href ? "font-medium" : ""}>{route.label}</span>
           </Link>
         ))}
-      </nav>
-      <div className="mt-auto border-t px-2 py-4 pb-10">
+      {/* <div className="mt-auto border-t px-2 py-4 pb-10"> */}
         <Link href="/auth/login">
           <Button
             variant="ghost"
@@ -184,7 +183,8 @@ export function AppSidebar() {
             <span>Logout</span>
           </Button>
         </Link>
-      </div>
+      </nav>
+      {/* </div> */}
       {isMobile && (
         <div className="absolute right-0 top-0 p-2">
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="h-8 w-8">
